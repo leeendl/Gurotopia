@@ -24,10 +24,10 @@ jobs:
 
         
       - if: matrix.os == 'windows-latest'
-        run: make -j4
+        run: make -j$(nproc)
         shell: msys2 {0}
       
       - if: matrix.os == 'ubuntu-latest'
-        run: make -j4
+        run: make -j$(nproc)
         # assume bash
   
