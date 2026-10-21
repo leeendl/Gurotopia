@@ -68,7 +68,7 @@ void action::buy(ENetEvent& event, const std::string& header, const std::string_
         send_varlist(event.peer, { "OnStoreRequest", StoreRequest });
         return;
     }
-    else for (auto &&[_tab, shouhin] : shouhin_tachi)
+    else for (auto [_tab, shouhin] : shouhin_tachi)
     {
         if (item == shouhin.btn)
         {
@@ -132,8 +132,6 @@ void action::buy(ENetEvent& event, const std::string& header, const std::string_
                 else modify_item_inventory(event, {item.first, item.second});
                 received.append(std::format("{}, ", raw_name)); // @todo add green text to rare items, or something cool.
             }
-            shouhin.items.clear(); // @todo
-
             send_varlist(event.peer, { "OnStorePurchaseResult", (_tab < 5) ? 
                 std::format(
                     "You've purchased `0{}`` for `${}`` Gems.\nYou have `${}`` Gems left.\n\n`5Received: ```0{}``",

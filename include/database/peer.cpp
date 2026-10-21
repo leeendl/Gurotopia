@@ -218,14 +218,13 @@ std::vector<ENetPeer*> peers(const std::string &world, peer_condition condition,
     return _peers;
 }
 
-void safe_disconnect_peers(int code)
+void safe_disconnect_peers(int signal)
 {
     peers("", peer_condition::PEER_ALL, [](ENetPeer &p) { enet_peer_disconnect(&p, 0); });
     enet_host_flush(host);
     
     enet_host_destroy(host);
     host = nullptr; // @todo clean this up better
-    enet_deinitialize();
 }
 
 gamePacket make_gamePacket(const enet_uint8 *data) 

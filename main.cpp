@@ -1,6 +1,6 @@
 /*
     @copyright gurotopia (c) 2024-05-25
-    @version parent SHA: 8f2b5977fd057b99e2e2a6f0e65170145decc159 2026-9-30
+    @version parent SHA: beb329cda3a1514f51feb1bf8c01afd857007d9f 2026-10-21
 */
 #include "include/pch.hpp"
 #include "include/eventType/_eventType.hpp"
@@ -41,8 +41,9 @@ int main()
     host->checksum = enet_crc32;
     enet_host_compress_with_range_coder(host);
 
-    gDb_config.init();
+    gDb_config.init(); // @note ./mysql_login.txt
     mysql_connect();
+
     decode_items();      // @note reads items.dat into legible class members (id, item name, ect)
     parse_store();       // @todo thread loop this so the store can update without restarting server (stored in .\resource\store.txt)
     check_for_holiday(); // @note check for any holidays using local time (your VPS or local time) - @todo thread loop so it can change the holiday without restarting
@@ -54,8 +55,9 @@ int main()
                 i->second(event);
 
     safe_disconnect_peers(gSignal);
-    mysql_close(db); // @note deletes db (MYSQL* allocation)
+    mysql_close(db); // @note delete db
     mysql_library_end();
+    enet_deinitialize();
 
     puts("killed gurotopia! [EXIT_SUCCESS]");
     return EXIT_SUCCESS;
