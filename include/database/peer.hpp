@@ -74,7 +74,8 @@ class peer {
 public:
     ~peer();
 
-    void load(const std::string &growid, const std::string &password);
+    bool load(const std::string &growid, const std::string &password);
+    bool load_by_uid(int uid);
 
     bool exists(const std::string &growid);
 
@@ -98,6 +99,7 @@ public:
     int netid{}; // @note peer's netid is world identity. this will be useful for many packet sending
     std::string display_growid{}; // @note use this for displaying growid, never use ::growid
     std::string country{};
+    float game_version{0.0f};
 
     u_int skin_color{ 2527912447 };
     u_int hair_color = bgra::GREEN | bgra::GREEN | bgra::RED | bgra::ALPHA; // @note value declines for specfic hair colors
