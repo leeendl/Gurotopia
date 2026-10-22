@@ -23,6 +23,7 @@ void action::enter_game(ENetEvent& event, const std::string& header)
     
     send_inventory_state(event);
     on::SetBux(event);
+    send_varlist(event.peer, { "OnSetVouchers", 0 });
     send_varlist(event.peer, { "SetHasGrowID", 1, pPeer->growid.c_str(), "" });
     {
         std::tm time = localtime();

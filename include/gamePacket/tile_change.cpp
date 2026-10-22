@@ -656,6 +656,8 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                     }
                     case type::SEED:
                     {
+                        if (item.type != type::SEED) break; // @note only allow another seed to be placed ontop
+
                         auto tree = std::ranges::find(world->trees, gamePacket.punch, &::tree::pos);
                         if (block.state[2] == S_SPLICED) throw std::runtime_error("It would be too dangerous to try to mix three seeds.");
                         for (::item &item : items)

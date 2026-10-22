@@ -1,5 +1,4 @@
 #include "pch.hpp"
-#include "https.hpp"
 #include "server_data.hpp"
 
 #include <openssl/err.h>
@@ -18,8 +17,9 @@
     #define SOCKET int
     #define INVALID_SOCKET	(SOCKET)(~0)
     #define SOCKET_ERROR	(-1)
-
 #endif
+
+#include "https.hpp"
 
 /* cross-platform socket close */
 static void cross_close(SOCKET fd)
@@ -64,7 +64,15 @@ void https::listener()
     {
         ERR_print_errors_fp(stderr);
     }
+    else {
+        X509 *cert = SSL_CTX_get0_certificate(ctx);
 
+        int day, sec;
+        ASN1_TIME_diff(&day, &sec, nullptr, X509_get0_notAfter(cert));
+
+        printf("server.crt loaded! expires in %d days\n", day);
+    }
+    
 #ifdef SIGPIPE // @note unix
     std::signal(SIGPIPE, SIG_IGN);
 #endif
@@ -138,17 +146,15 @@ void https::listener()
             ERR_print_errors_fp(stderr);
         }
         else {
-            char buf[213]; // @note size of growtopia's POST request.
-            const int length{ sizeof(buf) };
+            char buf[245+36]; // @note size of growtopia's POST request.
 
-            int rbytes = SSL_read(ssl, buf, length);
+            int rbytes = SSL_read(ssl, buf, sizeof(buf));
             if (rbytes <= 0) ERR_print_errors_fp(stderr); // @todo support retryable
-            else if (rbytes == length) // @note save time instead of doing >0
-            {
+            else {
                 printf("%s\n", buf); // @note to confirm the peer connected. else you could also see if loginurl dashboard appears.
 
-                int wbytes = SSL_write(ssl, response.c_str(), response.size());
-                if (wbytes <= 0) ERR_print_errors_fp(stderr); // @todo support retryable
+                int wbytes = SSL_write(ssl, response.c_str(), response.length());
+                if (wbytes < response.length()) ERR_print_errors_fp(stderr); // @todo support retryable
             }
         }
 
@@ -159,7 +165,7 @@ void https::listener()
             ERR_print_errors_fp(stderr);
         }
         SSL_free(ssl);
-        if (shutdown(fd, 2) == SOCKET_ERROR) cross_log("failed to shutdown socket"); // @todo unsure if WSA can handle this.
+        if (::shutdown(fd, 2) == SOCKET_ERROR) cross_log("failed to shutdown socket"); // @todo unsure if WSA can handle this.
         cross_close(fd);
     }
 }
