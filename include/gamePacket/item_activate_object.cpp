@@ -32,7 +32,7 @@ void item_activate_object(ENetEvent& event, ::gamePacket gamePacket)
     else
     {
         pPeer->gems += object->count;
-        pPeer->save();
+        pPeer->mysql_update("gems", pPeer->gems);
         on::SetBux(event);
     }
     remove_object(event, object->uid);

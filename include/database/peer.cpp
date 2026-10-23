@@ -87,63 +87,18 @@ template std::string peer::mysql_select<std::string>(const std::string&, const s
 
 void peer::mysql_select_all(bool by_user_id)
 {
-    ::hStmt hStmt{
-        std::format(
-            "SELECT uid, growid, password, UNIX_TIMESTAMP(created_at), inventory, gems, level, xp "
-            "FROM peer WHERE {} = ? LIMIT 1",
-            by_user_id ? "uid" : "growid"
-        ).c_str()
-    };
+    this->user_id    = this->mysql_select<signed>("uid");
+    this->growid     = this->mysql_select<std::string>("growid");
+    this->password   = this->mysql_select<std::string>("password");
+    this->created_at = this->mysql_select<std::time_t>("created_at", "UNIX_TIMESTAMP");
+    this->gems       = this->mysql_select<long long>("gems");
+    this->level[0]   = this->mysql_select<signed>("level");
+    this->level[1]   = this->mysql_select<signed>("xp");
+    auto inventory   = this->mysql_select<std::vector<u_char>>("inventory");
 
-    MYSQL_BIND param = by_user_id ? make_bind_in(this->user_id) : make_bind_in(this->growid);
-    hStmt.bind_param(&param);
-
-    signed uid_val{};
-    std::string growid_val{};
-    std::string password_val{};
-    long long created_at_val{};
-    std::vector<u_char> blob{};
-    long long gems_val{};
-    signed level_val{1};
-    signed xp_val{0};
-
-    u_long growid_len = 0;
-    u_long password_len = 0;
-    u_long blob_len = 0;
-
-    MYSQL_BIND results[8] = {
-        make_bind_out(uid_val),
-        make_bind_out(growid_val),
-        make_bind_out(password_val),
-        make_bind_out(created_at_val),
-        make_bind_out(blob),
-        make_bind_out(gems_val),
-        make_bind_out(level_val),
-        make_bind_out(xp_val)
-    };
-    results[1].length = &growid_len;
-    results[2].length = &password_len;
-    results[4].length = &blob_len;
-
-    mysql_stmt_bind_result(hStmt.pStmt, results);
-    hStmt.execute();
-    hStmt.fetch();
-
-    growid_val.resize(growid_len);
-    password_val.resize(password_len);
-    blob.resize(blob_len);
-
-    this->user_id    = uid_val;
-    this->growid     = growid_val;
-    this->password   = password_val;
-    this->created_at = static_cast<std::time_t>(created_at_val);
-    this->gems       = gems_val;
-    this->level[0]   = static_cast<u_short>(std::max(1, level_val));
-    this->level[1]   = static_cast<u_short>(std::max(0, xp_val));
-
-    if (blob.size() >= sizeof(int) + sizeof(short))
+    if (inventory.size() >= sizeof(int) + sizeof(short))
     {
-        const u_char *u8 = blob.data();
+        const u_char *u8 = inventory.data();
 
         int pos{};
         memcpy(&this->slot_size, u8 + pos, sizeof(int)); pos += sizeof(int);
@@ -152,7 +107,7 @@ void peer::mysql_select_all(bool by_user_id)
         this->slots.resize(size);
         for (::slot &slot : this->slots)
         {
-            if (pos + sizeof(short) * 2 <= blob.size())
+            if (pos + sizeof(short) * 2 <= inventory.size())
             {
                 memcpy(&slot.id,    u8 + pos, sizeof(short)); pos += sizeof(short);
                 memcpy(&slot.count, u8 + pos, sizeof(short)); pos += sizeof(short);
@@ -166,7 +121,7 @@ void peer::mysql_select_all(bool by_user_id)
         this->slots[0ull] = ::slot{18, 1};   // @note fist
         this->slots[1ull] = ::slot{32, 1};   // @note wrench
         this->slots[2ull] = ::slot{9640, 1}; // @note my first world lock
-        this->save();
+        this->mysql_update_all();
     }
 }
 
@@ -182,21 +137,17 @@ void peer::mysql_select_all(bool by_user_id)
     return blob;
 }
 
-void peer::save()
+void peer::mysql_update_all()
 {
     if (this->growid.empty()) return;
 
     ::hStmt hStmt{ "UPDATE peer SET inventory = ?, gems = ?, level = ?, xp = ? WHERE growid = ?" };
 
-    const auto inv_data = this->serialize_inventory().data();
-    signed lvl = static_cast<signed>(this->level.front());
-    signed cur_xp = static_cast<signed>(this->level.back());
-
     MYSQL_BIND params[5] = {
-        make_bind_in(inv_data),
+        make_bind_in(this->serialize_inventory()),
         make_bind_in(this->gems),
-        make_bind_in(lvl),
-        make_bind_in(cur_xp),
+        make_bind_in(this->level[0]),
+        make_bind_in(this->level[1]),
         make_bind_in(this->growid)
     };
     hStmt.bind_param(params);
@@ -235,43 +186,19 @@ bool peer::create_account(const std::string &growid, const std::string &password
     this->mysql_insert("growid", growid);
     this->mysql_update("password", password);
 
-    this->slot_size = 16;
     this->slots.resize(3ull); // @note default starter items
     this->slots[0ull] = ::slot{18, 1};   // @note fist
     this->slots[1ull] = ::slot{32, 1};   // @note wrench
     this->slots[2ull] = ::slot{9640, 1}; // @note my first world lock
-    this->gems = 0;
-    this->level = { 1, 0 };
 
-    this->save();
+    this->mysql_update_all();
     this->mysql_select_all(false);
-    return true;
-}
-
-bool peer::create_account(const std::string &growid, const std::string &password)
-{
-    this->growid = growid;
-    if (this->exists(growid))
-    {
-        return false;
-    }
-    this->mysql_insert("growid", growid);
-    this->mysql_update("password", password);
-
-    this->slot_size = 16;
-    this->slots.resize(3ull); // @note default starter items
-    this->slots[0ull] = ::slot{18, 1};   // @note fist
-    this->slots[1ull] = ::slot{32, 1};   // @note wrench
-    this->slots[2ull] = ::slot{9640, 1}; // @note my first world lock
-    this->mysql_update<std::vector<u_char>>("inventory", this->serialize_inventory().data());
-
-    this->mysql_select_all();
     return true;
 }
 
 peer::~peer()
 {
-    this->save();
+    this->mysql_update_all();
 }
 
 u_short peer::emplace(::slot slot) 
@@ -317,7 +244,9 @@ void peer::add_xp(ENetEvent &event, u_short value)
         send_varlist(event.peer, { "OnTalkBubble", this->netid, message, 0u });
         on::ConsoleMessage(event.peer, message);
     }
-    this->save();
+
+    this->mysql_update("level", this->level[0]);
+    this->mysql_update("xp",    this->level[1]);
 }
 
 void peer::update_effects()

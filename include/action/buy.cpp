@@ -142,7 +142,7 @@ void action::buy(ENetEvent& event, const std::string& header, const std::string_
             });
             if (_tab < 5/*growtoken tab*/)
             {
-                pPeer->save();
+                pPeer->mysql_update("gems", pPeer->gems);
                 on::SetBux(event);
             }
             else modify_item_inventory(event, ::slot(growtoken->id, -growtoken_cost));
