@@ -31,7 +31,7 @@ void action::join_request(ENetEvent& event, const std::string& header, const std
             
         ::world &world = *it;
         {
-            ::blob blob = compress_state(::gamePacket{ .type = 0x04, /*PACKET_SEND_MAP_DATA*/ .state = state::S_EXTENDED });
+            ::blob blob = compress_state(::gamePacket{ .type = 0x04, /*PACKET_SEND_MAP_DATA*/ .state = (int)gamePacketState::EXTENDED });
             blob.push_back(world.serialize());
 
             ENetPacket *packet = enet_packet_create(blob.data().data(), blob.size(), ENET_PACKET_FLAG_RELIABLE);
@@ -55,22 +55,22 @@ void action::join_request(ENetEvent& event, const std::string& header, const std
         pPeer->rest_pos = world.spawn;
 
         pPeer->netid = ++world.netid_counter;
-        peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&event, &pPeer, &world](ENetPeer& peer/*send to everyone in world*/) 
+        peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&event, &pPeer, &world](ENetPeer *peer/*send to everyone in world*/) 
         {
-            ::peer *pOthers = static_cast<::peer*>(peer.data); // @note everyone in world's peer.data
+            ::peer *pOthers = static_cast<::peer*>(peer->data); // @note everyone in world's peer.data
             
             if (pOthers->user_id != pPeer->user_id)
             {
                 on::Spawn(*event.peer, pOthers->netid, pOthers->user_id, pOthers->pos, pOthers->display_growid, pOthers->country, pOthers->role, pOthers->role >= DEVELOPER, false);
-                on::Spawn(peer, pPeer->netid, pPeer->user_id, pPeer->rest_pos, pPeer->display_growid, pPeer->country, pPeer->role, pPeer->role >= DEVELOPER, false);
+                on::Spawn(*peer, pPeer->netid, pPeer->user_id, pPeer->rest_pos, pPeer->display_growid, pPeer->country, pPeer->role, pPeer->role >= DEVELOPER, false);
                 on::SetClothing(peer);
-                on::ConsoleMessage(&peer, std::format("`5<{} entered, `w{}`` others here>``", pPeer->display_growid, world.visitors));
+                on::ConsoleMessage(peer, std::format("`5<{} entered, `w{}`` others here>``", pPeer->display_growid, world.visitors));
             }
             
 
             if (pOthers->user_id != pPeer->user_id) // @note the reason this is here is cause we need the peer's OnSpawn to happen before OnTalkBubble
             {
-                send_varlist(&peer, {
+                send_varlist(peer, {
                     "OnTalkBubble",
                     pPeer->netid,
                     std::format("`5<{} entered, `w{}`` others here>``", pPeer->display_growid, world.visitors),
@@ -90,11 +90,11 @@ void action::join_request(ENetEvent& event, const std::string& header, const std
         on::ConsoleMessage(event.peer, 
             std::format(
                 "World `w{}`` entered.  There are `w{}`` other people here, `w{}`` online.", 
-                world.name, world.visitors, peers().size()
+                world.name, world.visitors, host->connectedPeers
             )
         );
         ++world.visitors;
-        on::SetClothing(*event.peer);
+        on::SetClothing(event.peer);
         on::CountryState(event);
 
         send_varlist(event.peer, {

@@ -106,10 +106,10 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                     const u_char number = RandomRange(0, 36);
                     const char color = (number == 0) ? '2' : (RandomRange(0, 3) < 2) ? 'b' : '4';
                     const std::string message = std::format("[{} spun the wheel and got `{}{}``!]", pPeer->display_growid, color, number);
-                    peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&event, &pPeer, message](ENetPeer& peer)
+                    peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&event, &pPeer, message](ENetPeer *peer)
                     {
-                        send_varlist(event.peer, { "OnTalkBubble", pPeer->netid, message }, -1, 2000);
-                        on::ConsoleMessage(event.peer, message, 2000);
+                        send_varlist(peer, { "OnTalkBubble", pPeer->netid, message }, -1, 2000);
+                        on::ConsoleMessage(peer, message, 2000);
                     });
                     break;
                 }
@@ -198,9 +198,9 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                     
                     world->weather = gamePacket.punch;
                     
-                    peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [block, item](ENetPeer& p)
+                    peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [block, item](ENetPeer *peer)
                     {
-                        send_varlist(&p, { "OnSetCurrentWeather", (block.state[2] & S_TOGGLE) ? get_weather_id(item.id) : 0 });
+                        send_varlist(peer, { "OnSetCurrentWeather", (block.state[2] & S_TOGGLE) ? get_weather_id(item.id) : 0 });
                     });
                     break;
                 }
@@ -258,9 +258,9 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                 if (reward == 1458)
                 {
                     std::string message = std::format("msg|`4The Power of Love! `2{} found a `#Golden Heart Crystal`2 in a `#{}`2!", pPeer->growid, item.raw_name);
-                    peers(pPeer->recent_worlds.back(), PEER_ALL, [message](ENetPeer &p)
+                    peers(pPeer->recent_worlds.back(), PeerSearch::EVERYONE, [message](ENetPeer *peer)
                     {
-                        send_action(p, "log", message.c_str());
+                        send_action(peer, "log", message.c_str());
                     });
                 }
                 if (++pPeer->gbc_pity % 100 == 0) modify_item_inventory(event, ::slot{9350, 1});
@@ -352,9 +352,9 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                     if (!door_mover(*world, gamePacket.punch)) throw std::runtime_error("There's no room to put the door there! You need 2 empty spaces vertically.");
 
                     std::string remember_name = world->name;
-                    peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&](ENetPeer& p) 
+                    peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&](ENetPeer *peer) 
                     { 
-                        ENetEvent fake{.peer = &p};
+                        ENetEvent fake{.peer = peer};
                         action::quit_to_exit(fake, "", true); // @note everyone in world exits
                         action::join_request(fake, "", remember_name); // @note everyone in world re-joins
                     });
@@ -379,10 +379,10 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                     block.state[3] |= S_FIRE;
 
                     std::string message = "`7[```4MWAHAHAHA!! FIRE FIRE FIRE```7]``";
-                    peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&](ENetPeer& p) 
+                    peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&](ENetPeer *peer) 
                     {
-                        send_varlist(event.peer, { "OnTalkBubble", pPeer->netid, message, 0u });
-                        on::ConsoleMessage(event.peer, message);
+                        send_varlist(peer, { "OnTalkBubble", pPeer->netid, message, 0u });
+                        on::ConsoleMessage(peer, message);
                     });
                     particle = 0x96;
 
@@ -433,14 +433,14 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                 }
                 case 408: // @note Duct Tape
                 {
-                    peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&](ENetPeer& p) 
+                    peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&](ENetPeer *peer) 
                     {
-                        ::peer *_p = static_cast<::peer*>(p.data);
+                        ::peer *_p = static_cast<::peer*>(peer->data);
 
                         if (gamePacket.punch == _p->pos.by_32(true))
                         {
                             _p->state |= S_DUCT_TAPE; // @todo add a 10 minute timer that will remove it.
-                            on::SetClothing(p);
+                            on::SetClothing(peer);
                         }
                     });
                     break;
@@ -731,10 +731,10 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                             pPeer->my_worlds.back() = world->name;
                         }
                         std::string placed_message = std::format("`5[```w{}`` has been `$World Locked`` by {}`5]``", world->name, pPeer->growid);
-                        peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&event, &pPeer, placed_message](ENetPeer& peer) 
+                        peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&event, &pPeer, placed_message](ENetPeer *peer) 
                         {
-                            send_varlist(&peer, { "OnTalkBubble", pPeer->netid, placed_message });
-                            on::ConsoleMessage(&peer, placed_message);
+                            send_varlist(peer, { "OnTalkBubble", pPeer->netid, placed_message });
+                            on::ConsoleMessage(peer, placed_message);
                         });
                     }
                     else throw std::runtime_error("Only one `$World Lock`` can be placed in a world, you'd have to remove the other one first.");
@@ -774,7 +774,7 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
             state_visuals(*event.peer, ::gamePacket{
                 .type = 0x0f, // @note PACKET_SEND_LOCK
                 .netid = world->owner, 
-                .state = state::S_EXTENDED, 
+                .state = (int)gamePacketState::EXTENDED, 
                 .id = gamePacket.id,
                 .punch = gamePacket.punch
             });

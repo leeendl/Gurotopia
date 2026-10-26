@@ -1,11 +1,11 @@
 #include "pch.hpp"
 #include "SetClothing.hpp"
 
-void on::SetClothing(ENetPeer &peer)
+void on::SetClothing(ENetPeer *peer)
 {
-    ::peer *pPeer = static_cast<::peer*>(peer.data);
+    ::peer *pPeer = static_cast<::peer*>(peer->data);
 
-    send_varlist(&peer, {
+    send_varlist(peer, {
         "OnSetClothing", 
         CL_Vec3f{pPeer->clothing[clothing::HAIR], pPeer->clothing[clothing::SHIRT], pPeer->clothing[clothing::LEGS]}, 
         CL_Vec3f{pPeer->clothing[clothing::FEET], pPeer->clothing[clothing::FACE], pPeer->clothing[clothing::HAND]}, 
@@ -24,5 +24,5 @@ void on::SetClothing(ENetPeer &peer)
         .punch = ::pos{ pPeer->hair_color, 0x00000000u } // @todo can this even be unsigned?
         
     };
-    state_visuals(peer, std::move(gamePacket)); // @todo handle for 'p'
+    state_visuals(*peer, std::move(gamePacket)); // @todo handle for 'p'
 }

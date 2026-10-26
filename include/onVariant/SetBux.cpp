@@ -6,14 +6,14 @@ void on::SetBux(ENetEvent& event)
 {
     ::peer *pPeer = static_cast<::peer*>(event.peer->data);
 
-    pPeer->gems = std::clamp<long long>(pPeer->gems, 0LL, std::numeric_limits<long long>::max());
+    pPeer->gems = std::clamp<long long>(pPeer->gems, 0ll, std::numeric_limits<long long>::max());
 
     if (pPeer->game_version >= 5.61f)
     {
         const float seconds_from_midnight = static_cast<float>(std::time(nullptr) % 86400);
         send_varlist(event.peer, {
             "OnSetBux",
-            static_cast<long long>(pPeer->gems),
+            pPeer->gems,
             1,
             0,
             CL_Vec3f{ seconds_from_midnight, 0.0f, 0.0f }

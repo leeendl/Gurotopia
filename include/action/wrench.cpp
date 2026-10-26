@@ -10,9 +10,9 @@ void action::wrench(ENetEvent& event, const std::string& header)
     if ((pipes[3ull] == "netid" && !pipes[4ull].empty()/*empty netid*/))
     {
         const short netid = atoi(pipes[4ull].c_str());
-        peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [event, pPeer, netid](ENetPeer& peer) 
+        peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&event, pPeer, netid](ENetPeer *peer) 
         {
-            ::peer *pOthers = static_cast<::peer*>(peer.data);
+            ::peer *pOthers = static_cast<::peer*>(peer->data);
             if (pOthers->netid == netid)
             {
                 u_short lvl = pOthers->level.front();

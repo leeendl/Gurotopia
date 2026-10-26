@@ -39,5 +39,5 @@ void on::RequestWorldSelectMenu(ENetEvent& event)
         ), 
         1
     });
-    on::ConsoleMessage(event.peer, std::format("Where would you like to go? (`w{}`` online)", peers().size()));
+    on::ConsoleMessage(event.peer, std::format("Where would you like to go? (`w{}`` online)", host->connectedPeers));
 }

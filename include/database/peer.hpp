@@ -149,27 +149,40 @@ public:
 
 extern ENetHost* host;
 
-enum peer_condition
+/* @brief search specific peer(s), used in peers() */
+enum class PeerSearch : u_char
 {
-    PEER_ALL, // @note all peer(s)
-    PEER_SAME_WORLD // @note only peer(s) in the same world as ENetEvent::peer
+    WORLD = 0,
+    EVERYONE = 1
 };
+template <typename Func>
+void peers(const std::string &world, PeerSearch search, Func &&fun)
+{
+    for (ENetPeer *peer = host->peers, *end = peer + host->peerCount; peer != end; ++peer)
+    {
+        if (peer->state != ENET_PEER_STATE_CONNECTED) continue;
 
-extern std::vector<ENetPeer*> peers(const std::string &world = "", peer_condition condition = PEER_ALL, std::function<void(ENetPeer&)> fun = [](ENetPeer& peer){});
+        if (search == PeerSearch::WORLD)
+        {
+            ::peer *pPeer = static_cast<::peer*>(peer->data);
+            if (pPeer->netid == 0 || (pPeer->recent_worlds.back() != world)) continue;
+        }
+        std::forward<Func>(fun)(peer);
+    }
+}
 
 extern void safe_disconnect_peers(int signal);
 
-enum state : int
+enum class gamePacketState : int
 {
-    S_UPDATE          = 0x00000004,
-    S_EXTENDED        = 0x00000008,
-    S_MOVE_LEFT       = 0x00000010,
-    S_MOVE_RIGHT      = 0x00000020,
-    S_LAVA_HIT        = 0x00000040,
-    S_JUMP            = 0x00000080,
-    S_ACTIVATE_OBJECT = 0x00004000
+    UPDATE               = 0x00000004,
+    EXTENDED             = 0x00000008,
+    MOVE_LEFT            = 0x00000010,
+    MOVE_RIGHT           = 0x00000020,
+    HIT_BY_LAVA          = 0x00000040,
+    JUMP                 = 0x00000080,
+    ITEM_ACTIVATE_OBJECT = 0x00004000
 };
-
 class gamePacket {
 public:
     int packet_create{ 04 }; // @note NET_MESSAGE_GAME_PACKET
@@ -177,7 +190,7 @@ public:
     int type{};
     int netid{};
     int uid{}; // @todo understand this better @note so far I think this holds uid value
-    int state{};
+    int state{}; // @note enum gamePacketState
     float count{}; // @todo understand this better
     int id{}; // @note peer's active hand, so 18 (fist) = punching, 32 (wrench) interacting, ect
     ::pos pos{}; // @note position 1D {x, y}

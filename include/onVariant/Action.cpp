@@ -13,8 +13,8 @@ void on::Action(ENetEvent& event, const std::string_view text)
         (text == "stubborn") ? "fold" : text;
 
     const std::string &action = ('/' + std::string(to_slang));
-    peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&pPeer, &action](ENetPeer &p)
+    peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&pPeer, &action](ENetPeer *peer)
     {
-        send_varlist(&p, { "OnAction", action }, pPeer->netid);
+        send_varlist(peer, { "OnAction", action }, pPeer->netid);
     });
 }

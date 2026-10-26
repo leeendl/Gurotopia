@@ -120,7 +120,7 @@ void send_varlist(ENetPeer *peer, VariantList vlist, int netid, int delay)
     ::blob data = compress_state(::gamePacket{
         .type = 01, // @note PACKET_CALL_FUNCTION
         .netid = netid,
-        .state = state::S_EXTENDED,
+        .state = (int)gamePacketState::EXTENDED,
 		.id = delay,
 		.size = size
 	});

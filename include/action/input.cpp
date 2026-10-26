@@ -29,20 +29,20 @@ void action::input(ENetEvent& event, const std::string& header)
     }
     else if (text.starts_with('/')) 
     {
-        send_action(*event.peer, "log", std::format("msg| `6{}``", text));
+        send_action(event.peer, "log", std::format("msg| `6{}``", text));
         std::string command = text.substr(1, text.find(' ') - 1);
         
         if (auto it = cmd_pool.find(command); it != cmd_pool.end()) 
         {
             if (std::ranges::find(cmd_requires_arg, command) != cmd_requires_arg.end() && text.length() <= command.length()+1)
             {
-                send_action(*event.peer, "log", "msg|`4Unknown command.`` Enter `$/?`` for a list of valid commands.");
+                send_action(event.peer, "log", "msg|`4Unknown command.`` Enter `$/?`` for a list of valid commands.");
             }
             else it->second(std::ref(event), std::move(text.substr(1)/* remove the '/' */));
         }
         else 
         {
-            send_action(*event.peer, "log", "msg|`4Unknown command.`` Enter `$/?`` for a list of valid commands.");
+            send_action(event.peer, "log", "msg|`4Unknown command.`` Enter `$/?`` for a list of valid commands.");
         }
     }
     else 
@@ -56,10 +56,10 @@ void action::input(ENetEvent& event, const std::string& header)
         }
         const std::string &player_chat = std::format("CP:0_PL:0_OID:_player_chat={}", text);
         const std::string &message = std::format("CP:0_PL:0_OID:_CT:[W]_ `6<{}>`` `$`${}````", pPeer->display_growid, text);
-        peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&event, &pPeer, player_chat, message](ENetPeer& p) 
+        peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&event, &pPeer, player_chat, message](ENetPeer *p) 
         {
-            send_varlist(&p, { "OnTalkBubble", pPeer->netid, player_chat, 0u });
-            on::ConsoleMessage(&p, message, 2);
+            send_varlist(p, { "OnTalkBubble", pPeer->netid, player_chat, 0u });
+            on::ConsoleMessage(p, message, 2);
         });
     }
 }

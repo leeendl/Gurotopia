@@ -373,7 +373,7 @@ world::~world()
 
 std::vector<world> worlds;
 
-void send_action(ENetPeer& p, const std::string &action, const std::string &str) 
+void send_action(ENetPeer *peer, const std::string &action, const std::string &str) 
 {
     const std::string &fmt_action = std::format("action|{}\n", action);
     std::vector<u_char> data(sizeof(int) + fmt_action.length() + str.length(), 0x00);
@@ -392,7 +392,7 @@ void send_action(ENetPeer& p, const std::string &action, const std::string &str)
     }
     
     ENetPacket *packet = enet_packet_create(data.data(), data.size(), ENET_PACKET_FLAG_RELIABLE);
-    if (enet_peer_send(&p, 0, packet)) enet_packet_destroy(packet);
+    if (enet_peer_send(peer, 0, packet)) enet_packet_destroy(packet);
 
 }
 
@@ -408,9 +408,9 @@ void state_visuals(ENetPeer &peer, ::gamePacket &&gamePacket)
 {
     ::peer *pPeer = static_cast<::peer*>(peer.data);
 
-    peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&](ENetPeer &p) 
+    peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&](ENetPeer *peer) 
     {
-        send_data(p, compress_state(gamePacket));
+        send_data(*peer, compress_state(gamePacket));
     });
 }
 
@@ -506,7 +506,7 @@ void add_drop(ENetEvent &event, ::slot im, ::pos pos, ::world &world) // @todo
 void send_tile_update(ENetEvent &event, ::gamePacket gamePacket, ::block &block, ::world &world) 
 {
     gamePacket.type = 05; // @note PACKET_SEND_TILE_UPDATE_DATA
-    gamePacket.state = state::S_EXTENDED;
+    gamePacket.state = (int)gamePacketState::EXTENDED;
     ::blob blob = compress_state(gamePacket);
 
     blob.push_back(block.to_blob());
@@ -553,9 +553,9 @@ void send_tile_update(ENetEvent &event, ::gamePacket gamePacket, ::block &block,
         }
     }
     ::peer *pPeer = static_cast<::peer*>(event.peer->data);
-    peers(pPeer->recent_worlds.back(), PEER_SAME_WORLD, [&](ENetPeer& p) 
+    peers(pPeer->recent_worlds.back(), PeerSearch::WORLD, [&blob](ENetPeer *peer) 
     {
-        send_data(p, blob);
+        send_data(*peer, blob);
     });
 }
 

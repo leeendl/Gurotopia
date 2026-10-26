@@ -8,5 +8,5 @@ void ghost(ENetEvent& event, const std::string_view text)
 
     pPeer->state ^= S_GHOST;
 
-    on::SetClothing(*event.peer);
+    on::SetClothing(event.peer);
 }

@@ -38,7 +38,7 @@ void action::protocol(ENetEvent& event, const std::string& header)
         if (pPeer->growid.empty() || pPeer->password.empty()) throw std::runtime_error("");
     }
     catch (...) {
-        send_action(*event.peer, "logon_fail", "");
+        send_action(event.peer, "logon_fail", "");
         return; // @note stop processing invalid protocol data
     }
 
@@ -48,8 +48,8 @@ void action::protocol(ENetEvent& event, const std::string& header)
         loaded = pPeer->create_account(pPeer->growid, pPeer->password);
         if (!loaded)
         {
-            send_action(*event.peer, "log", "msg|`4Registration failed:`` GrowID already exists.");
-            send_action(*event.peer, "logon_fail", "");
+            send_action(event.peer, "log", "msg|`4Registration failed:`` GrowID already exists.");
+            send_action(event.peer, "logon_fail", "");
             enet_peer_disconnect_later(event.peer, 0);
             return;
         }
@@ -59,8 +59,8 @@ void action::protocol(ENetEvent& event, const std::string& header)
         loaded = pPeer->load(pPeer->growid, pPeer->password);
         if (!loaded)
         {
-            send_action(*event.peer, "log", "msg|`4Logon failed:`` Invalid GrowID or password.");
-            send_action(*event.peer, "logon_fail", "");
+            send_action(event.peer, "log", "msg|`4Logon failed:`` Invalid GrowID or password.");
+            send_action(event.peer, "logon_fail", "");
             enet_peer_disconnect_later(event.peer, 0);
             return;
         }

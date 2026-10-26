@@ -13,9 +13,9 @@ void sb(ENetEvent& event, const std::string_view text)
     if (world == worlds.end()) return;
 
     std::string display = pPeer->recent_worlds.back();
-    peers("", PEER_ALL, [&event, &pPeer, message, display](ENetPeer& peer) 
+    peers("", PeerSearch::EVERYONE, [&event, &pPeer, message, display](ENetPeer *peer) 
     {
-        on::ConsoleMessage(&peer, 
+        on::ConsoleMessage(peer, 
             std::format(
                 "CP:0_PL:0_OID:_CT:[SB]_ `5** from ({}```5) in [```${}```5] ** : ```${}``",
                 pPeer->display_growid, display, message

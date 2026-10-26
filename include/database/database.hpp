@@ -2,9 +2,27 @@
 
 #include <mysql/mysql.h>
 
-extern MYSQL *db;
+class mysql_gateway
+{
+public:
+    mysql_gateway() { mysql = mysql_init(NULL); }
+    ~mysql_gateway() { mysql_close(mysql); }
 
-extern void mysql_connect();
+    void create_table_if_not_exist();
+    bool column_found(const std::string &table, const std::string &column);
+    void alter_table(const std::string &column);
+    void integrity();
+
+    void mysql_connect();
+    void load_login();
+
+    MYSQL *mysql{nullptr};
+private:
+    std::string host{"127.0.0.1"};
+    std::string user{"root"};
+    std::string passwd{""};
+};
+extern ::mysql_gateway db;
 
 class hStmt
 {
@@ -20,7 +38,7 @@ public:
     void fetch();
 
     /* https://dev.mysql.com/doc/mysql-errors/8.4/en/client-error-reference.html */
-    void log_err() { std::fprintf(stderr, "[MariaDB] %s\n", mysql_error(db)); }
+    void log_err() { std::fprintf(stderr, "[MariaDB] %s\n", mysql_error(db.mysql)); }
 
     MYSQL_STMT *pStmt;
 };

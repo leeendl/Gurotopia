@@ -262,33 +262,10 @@ void peer::update_effects()
 
 ENetHost *host;
 
-std::vector<ENetPeer*> peers(const std::string &world, peer_condition condition, std::function<void(ENetPeer&)> fun)
-{
-    std::vector<ENetPeer*> _peers{};
-    _peers.reserve(host->peerCount);
-
-    for (ENetPeer &peer : std::span(host->peers, host->peerCount))
-        if (peer.state == ENET_PEER_STATE_CONNECTED)
-        {
-            if (condition == peer_condition::PEER_SAME_WORLD)
-            {
-                ::peer *pOthers = static_cast<::peer*>(peer.data);
-                if (pOthers->netid == 0 || (pOthers->recent_worlds.back() != world)) continue;
-            }
-            fun(peer);
-            _peers.push_back(&peer);
-        }
-
-    return _peers;
-}
-
 void safe_disconnect_peers(int signal)
 {
-    peers("", peer_condition::PEER_ALL, [](ENetPeer &p) { enet_peer_disconnect(&p, 0); });
+    peers("", PeerSearch::EVERYONE, [](auto *p) { enet_peer_disconnect(p, 0); });
     enet_host_flush(host);
-    
-    enet_host_destroy(host);
-    host = nullptr; // @todo clean this up better
 }
 
 gamePacket make_gamePacket(const enet_uint8 *data) 
@@ -342,7 +319,7 @@ void send_inventory_state(ENetEvent &event)
     ::blob blob = compress_state(::gamePacket{
         .type = 0x09, // @note PACKET_SEND_INVENTORY_STATE
         .netid = pPeer->netid,
-        .state = state::S_EXTENDED
+        .state = (int)gamePacketState::EXTENDED
     });
     blob.u8(0x01); // @note enable flag for big backpack
 

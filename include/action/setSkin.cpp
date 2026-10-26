@@ -11,7 +11,7 @@ void action::setSkin(ENetEvent& event, const std::string& header)
     try
     {
         pPeer->skin_color = (u_int)stoul(pipes[3]);
-        on::SetClothing(*event.peer);
+        on::SetClothing(event.peer);
     }
     catch (const std::logic_error &le) {} // @note std::invalid_argument std::out_of_range
 }

@@ -1,14 +1,15 @@
 #pragma once
 
-enum holiday : u_char
+enum class holiday : u_char
 {
-    H_NONE,
-    H_VALENTINES,
-    H_PATRICKS,
-    H_SUMMERFEST = 6,
-    H_G4G = 18
+    NO_ACTIVE = 0,
+    VALENTINES = 1,
+    PATRICKS = 2,
+    SUMMERFEST = 6,
+    HALLOWEEN = 8,
+    G4G = 18
 };
-extern u_char holiday;
+extern ::holiday active_holiday;
 
 extern std::tm localtime();
 

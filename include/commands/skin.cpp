@@ -12,7 +12,7 @@ void skin(ENetEvent& event, const std::string_view text)
     try
     {
         pPeer->skin_color = (u_int)stoul(id);
-        on::SetClothing(*event.peer);
+        on::SetClothing(event.peer);
     }
     catch (const std::logic_error &le) {} // @note std::invalid_argument std::out_of_range
 }

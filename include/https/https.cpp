@@ -57,7 +57,6 @@ void https::listener()
     {
         ERR_print_errors_fp(stderr);
     }
-
     /* https://docs.openssl.org/master/man3/SSL_CTX_use_certificate/#return-values */
     if (SSL_CTX_use_certificate_file(ctx, "resources/ctx/server.crt", SSL_FILETYPE_PEM) != 1 ||
         SSL_CTX_use_PrivateKey_file(ctx, "resources/ctx/server.key", SSL_FILETYPE_PEM)  != 1)
@@ -65,12 +64,25 @@ void https::listener()
         ERR_print_errors_fp(stderr);
     }
     else {
+        /* https://docs.openssl.org/master/man3/SSL_CTX_use_certificate/#return-values */
         X509 *cert = SSL_CTX_get0_certificate(ctx);
-
+        if (!cert)
+        {
+            ERR_print_errors_fp(stderr);
+        }
+        /* https://docs.openssl.org/3.2/man3/X509_get0_notBefore/#return-values */
+        const ASN1_TIME *notAfter = X509_get0_notAfter(cert);
+        if (notAfter == nullptr)
+        {
+            ERR_print_errors_fp(stderr);
+        }
         int day, sec;
-        ASN1_TIME_diff(&day, &sec, nullptr, X509_get0_notAfter(cert));
-
-        printf("server.crt loaded! expires in %d days\n", day);
+        /* https://docs.openssl.org/1.0.2/man3/ASN1_TIME_set/#return-values */
+        if (ASN1_TIME_diff(&day, &sec, nullptr, notAfter) == 0)
+        {
+            ERR_print_errors_fp(stderr);
+        }
+        printf("certificate expires in %d days\n", day);
     }
     
 #ifdef SIGPIPE // @note unix

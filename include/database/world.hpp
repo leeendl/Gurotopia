@@ -172,7 +172,7 @@ public:
 };
 extern std::vector<world> worlds;
 
-extern void send_action(ENetPeer &p, const std::string &action, const std::string &str);
+extern void send_action(ENetPeer *peer, const std::string &action, const std::string &str);
 
 extern void send_data(ENetPeer &peer, const ::blob &blob);
 
