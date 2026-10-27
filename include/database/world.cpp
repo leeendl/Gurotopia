@@ -238,10 +238,9 @@ void world::mysql_select_all()
     this->name = this->mysql_select<std::string>("name");
     this->owner = this->mysql_select<int>("owner");
     {
-        this->trees.clear();
         ::blob blob = this->mysql_select<::blob>("blocks");
-        this->blocks.resize(cord(0, 60));
 
+        this->blocks.resize(cord(0, 60));
         const int x = this->blocks.size() / 60;
         int pos{};
         for (u_short i = 0; ::block &block : this->blocks)
@@ -284,23 +283,20 @@ void world::mysql_select_all()
     } // @note delete blob, i
     {
         ::blob blob = this->mysql_select<::blob>("objects"); // @note ::blob is cut to the real length, std::vector<u_char> stays at the full buffer size
+        
+        int pos{};
 
-        const u_char *u8 = blob.data().data(); // @note i did not have the brain capacity to reinterpret it. t-t (memcpy is safer anyways...)
-        int i{};
-
-        memcpy(&this->last_object_uid, u8, sizeof(u_int));
-        i += sizeof(u_int); // @todo real gt has this as 8 bits not just 4.
-
-        objects.resize((blob.size() - sizeof(u_int)) / 16); // @note count from the saved data, not the last drop uid
+        blob.read_u32(this->last_object_uid, pos); // @todo real gt has this as 8 bits not just 4.
+        objects.resize(blob.size() >= sizeof(u_int) ? (blob.size() - sizeof(u_int)) / 16 : 0); // @note count from the saved data, not the last drop uid
         for (::object &object : this->objects)
         {
-            memcpy(&object.id,    u8 + i, sizeof(u_short)); i += sizeof(u_short);
-            memcpy(&object.pos.x, u8 + i, sizeof(float));   i += sizeof(float);
-            memcpy(&object.pos.y, u8 + i, sizeof(float));   i += sizeof(float);
-            memcpy(&object.count, u8 + i, sizeof(u_short)); i += sizeof(u_short);
-            memcpy(&object.uid,   u8 + i, sizeof(u_int));   i += sizeof(u_int);
+            blob.read_u16(object.id, pos);
+            blob.read_f32(object.pos.x, pos);
+            blob.read_f32(object.pos.y, pos);
+            blob.read_u16(object.count, pos);
+            blob.read_u32(object.uid, pos);
         }
-    } // @note delete blob, i
+    } // @note delete blob, pos
 }
 
 world::world(const std::string &name) : name(name)/*DEFAULT*/

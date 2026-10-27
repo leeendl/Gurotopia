@@ -5,6 +5,7 @@ enum class holiday : u_char
     NO_ACTIVE = 0,
     VALENTINES = 1,
     PATRICKS = 2,
+    CINCO_DE_MAYO = 5,
     SUMMERFEST = 6,
     HALLOWEEN = 8,
     G4G = 18

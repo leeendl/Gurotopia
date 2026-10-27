@@ -648,12 +648,6 @@ void tile_change(ENetEvent& event, ::gamePacket gamePacket)
                 bool update_tile{};
                 switch (items[world->blocks[cord(gamePacket.punch.x, gamePacket.punch.y)].fg].type)
                 {
-                    case type::DISPLAY_BLOCK:
-                    {
-                        world->displays.emplace_back(::display(item.id, gamePacket.punch));
-                        update_tile = true;
-                        break;
-                    }
                     case type::SEED:
                     {
                         if (item.type != type::SEED) break; // @note only allow another seed to be placed ontop

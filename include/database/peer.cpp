@@ -94,24 +94,20 @@ void peer::mysql_select_all(bool by_user_id)
     this->gems       = this->mysql_select<long long>("gems");
     this->level[0]   = this->mysql_select<signed>("level");
     this->level[1]   = this->mysql_select<signed>("xp");
-    auto inventory   = this->mysql_select<std::vector<u_char>>("inventory");
+    auto inventory   = this->mysql_select<::blob>("inventory");
 
-    if (inventory.size() >= sizeof(int) + sizeof(short))
+    if (inventory.size() >= sizeof(int)/*slot_size*/ + sizeof(short)/*size*/)
     {
-        const u_char *u8 = inventory.data();
-
         int pos{};
-        memcpy(&this->slot_size, u8 + pos, sizeof(int)); pos += sizeof(int);
+        inventory.read_i32(this->slot_size, pos);
+
         short size{};
-        memcpy(&size, u8 + pos, sizeof(short)); pos += sizeof(short);
+        inventory.read_i16(size, pos);
         this->slots.resize(size);
         for (::slot &slot : this->slots)
         {
-            if (pos + sizeof(short) * 2 <= inventory.size())
-            {
-                memcpy(&slot.id,    u8 + pos, sizeof(short)); pos += sizeof(short);
-                memcpy(&slot.count, u8 + pos, sizeof(short)); pos += sizeof(short);
-            }
+            if (!inventory.read_i16(slot.id, pos)) break;
+            if (!inventory.read_i16(slot.count, pos)) break;
         }
     }
     else
@@ -154,7 +150,7 @@ void peer::mysql_update_all()
     hStmt.execute();
 }
 
-bool peer::load(const std::string &growid, const std::string &password)
+bool peer::load(const std::string &growid, const std::string password)
 {
     this->growid = growid;
     if (!this->exists(growid))
@@ -237,16 +233,13 @@ void peer::add_xp(ENetEvent &event, u_short value)
             /* @todo based on account age give peer other items... */
         }
         if (lvl == 125) on::CountryState(event);
-        send_varlist(event.peer, { "OnPlayerLeveledUp", lvl });
-        send_varlist(event.peer, { "OnParticleEffect", 46u, CL_Vec2f{1812.0f, 1724.0f}, 0.0f, 0.0f });
+        send_varlist(event.peer, { "OnPlayerLeveledUp", (unsigned)lvl });
+        send_varlist(event.peer, { "OnParticleEffect", 46u, CL_Vec2f{this->pos.x + 16.0f, this->pos.y + 16.0f}, 0.0f, 0.0f });
 
         std::string message = std::format("{} is now level {}!", this->display_growid, lvl);
         send_varlist(event.peer, { "OnTalkBubble", this->netid, message, 0u });
         on::ConsoleMessage(event.peer, message);
     }
-
-    this->mysql_update("level", this->level[0]);
-    this->mysql_update("xp",    this->level[1]);
 }
 
 void peer::update_effects()
@@ -270,7 +263,7 @@ void safe_disconnect_peers(int signal)
 
 gamePacket make_gamePacket(const enet_uint8 *data) 
 {
-    const int   *i32   = reinterpret_cast<const int*>(data);
+    const int   *i32 = reinterpret_cast<const int*>(data);
     const u_int *u32 = reinterpret_cast<const u_int*>(data);
     const float *f32 = reinterpret_cast<const float*>(data);
 

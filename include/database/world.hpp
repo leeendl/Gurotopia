@@ -160,7 +160,6 @@ public:
     u_int last_object_uid{0};
     std::vector<::object> objects{};
     std::vector<::door> doors{};
-    std::vector<::display> displays{};
     std::vector<::random_block> random_blocks{};
     std::vector<::sign> signs{};
     std::vector<::tree> trees{};

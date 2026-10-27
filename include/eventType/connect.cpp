@@ -4,7 +4,7 @@
 
 void _connect(ENetEvent& event, int status) 
 {
-    ENetPacket *packet = enet_packet_create(nullptr, sizeof(status)+1, ENET_PACKET_FLAG_RELIABLE);
+    ENetPacket *packet = enet_packet_create(nullptr, sizeof(status), ENET_PACKET_FLAG_RELIABLE);
 
     if (host->connectedPeers > host->peerCount) 
     {

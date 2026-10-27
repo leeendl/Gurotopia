@@ -7,66 +7,58 @@
 
 void mysql_gateway::create_table_if_not_exist()
 {
-    std::string query_peer =
+    int error;
+    error = mysql_query(mysql,
         "CREATE TABLE IF NOT EXISTS peer ("
-            "uid INT AUTO_INCREMENT PRIMARY KEY,"
-            "growid VARCHAR(18) UNIQUE,"
-            "password VARCHAR(18),"
-            "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
-            "inventory BLOB,"
-            "gems BIGINT DEFAULT 0,"
-            "level INT DEFAULT 1,"
-            "xp INT DEFAULT 0"
-        ")";
-    std::string query_world =
+        "uid INT AUTO_INCREMENT PRIMARY KEY,"
+        "growid VARCHAR(18) UNIQUE,"
+        "password VARCHAR(18),"
+        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+        "inventory BLOB,"
+        "gems BIGINT DEFAULT 0,"
+        "level INT DEFAULT 1,"
+        "xp INT DEFAULT 0"
+    ")");
+    error = mysql_query(mysql, 
         "CREATE TABLE IF NOT EXISTS world ("
-            "name VARCHAR(24) NOT NULL PRIMARY KEY,"
-            "owner INT DEFAULT 0,"
-            "blocks BLOB,"
-            "objects BLOB"
-        ")";
-    if (mysql_query(mysql, query_peer.c_str()) || mysql_query(mysql, query_world.c_str()))
-    {
-        std::fprintf(stderr, "%s\n", mysql_error(mysql));
-    }
+        "name VARCHAR(24) NOT NULL PRIMARY KEY,"
+        "owner INT DEFAULT 0,"
+        "blocks BLOB,"
+        "objects BLOB"
+    ")");
+    
+    if (error) std::fprintf(stderr, "%s\n", mysql_error(mysql));
 }
 
 bool mysql_gateway::column_found(const std::string &table, const std::string &column)
 {
-    std::string query = std::format(
-        "SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_NAME = '{}' AND COLUMN_NAME = '{}' LIMIT 1",
-        table, column
+    mysql_query(mysql, std::format(
+        "SHOW COLUMNS FROM {} WHERE Field = '{}'", 
+        table, column).c_str()
     );
-    if (mysql_query(mysql, query.c_str())) return false;
-
     MYSQL_RES *res = mysql_store_result(mysql);
-    if (!res) return false;
 
-    my_ulonglong count = mysql_num_rows(res);
+    my_ulonglong rows = mysql_num_rows(res);
     mysql_free_result(res);
-    return count > 0;
+    return (rows > 0);
 }
 
-void mysql_gateway::alter_table(const std::string &column)
+int mysql_gateway::alter_table(const std::string &table, const std::string &column)
 {
-    std::string query = std::format("ALTER TABLE peer ADD COLUMN {}", column);
-    if (mysql_query(mysql, query.c_str()))
-    {
-        std::fprintf(stderr, "%s\n", mysql_error(mysql));
-    }
+    return mysql_query(mysql, std::format("ALTER TABLE {} ADD COLUMN {}", table, column).c_str());
 }
 
 /* @note i use this for new columns. this could be removed once i 100% copy rgt. */
 void mysql_gateway::integrity()
 {
-    if (!column_found("peer", "gems"))  alter_table("gems BIGINT DEFAULT 0");
-    if (!column_found("peer", "level")) alter_table("level INT DEFAULT 1");
-    if (!column_found("peer", "xp"))    alter_table("xp INT DEFAULT 0");
+    if (!column_found("peer", "gems"))  alter_table("peer", "gems BIGINT DEFAULT 0");
+    if (!column_found("peer", "level")) alter_table("peer", "level INT DEFAULT 1");
+    if (!column_found("peer", "xp"))    alter_table("peer", "xp INT DEFAULT 0");
 }
 
 void mysql_gateway::mysql_connect()
 {
-    if (mysql_real_connect(mysql, this->host.c_str(), this->user.c_str(), this->passwd.c_str(), NULL, 3306u, NULL, 0ul) == NULL) 
+    if (!mysql_real_connect(mysql, this->host.c_str(), this->user.c_str(), this->passwd.c_str(), NULL, 3306u, NULL, 0ul)) 
     {
         std::fprintf(stderr, "[MariaDB] %s\n", mysql_error(mysql));
     }

@@ -10,7 +10,7 @@ public:
 
     void create_table_if_not_exist();
     bool column_found(const std::string &table, const std::string &column);
-    void alter_table(const std::string &column);
+    int alter_table(const std::string &table, const std::string &column);
     void integrity();
 
     void mysql_connect();
@@ -66,6 +66,11 @@ struct blob
         mData.resize(size + sizeof(short));
         memcpy(mData.data() + size, &val, sizeof(short));
     }
+    void u8(u_char val) {
+        mData.push_back(val);
+    }
+
+
     bool read_string(std::string &val, int &pos)
     {
         short len{};
@@ -74,6 +79,20 @@ struct blob
         val.resize(len);
         memcpy(val.data(), mData.data() + pos, len);
         pos += len;
+        return true;
+    }
+    bool read_f32(float &val, int &pos)
+    {
+        if (pos + (int)sizeof(float) > (int)mData.size()) return false;
+        memcpy(&val, mData.data()+pos, sizeof(float));
+        pos += sizeof(float);
+        return true;
+    }
+    bool read_i32(int &val, int &pos)
+    {
+        if (pos + (int)sizeof(int) > (int)mData.size()) return false;
+        memcpy(&val, mData.data()+pos, sizeof(int));
+        pos += sizeof(int);
         return true;
     }
     bool read_u32(u_int &val, int &pos)
@@ -90,6 +109,13 @@ struct blob
         pos += sizeof(short);
         return true;
     }
+    bool read_u16(u_short &val, int &pos)
+    {
+        if (pos + (int)sizeof(u_short) > (int)mData.size()) return false;
+        memcpy(&val, mData.data()+pos, sizeof(u_short));
+        pos += sizeof(u_short);
+        return true;
+    }
     bool read_i8(char &val, int &pos)
     {
         if (pos + (int)sizeof(char) > (int)mData.size()) return false;
@@ -104,9 +130,8 @@ struct blob
         pos += sizeof(u_char);
         return true;
     }
-    void u8(u_char val) {
-        mData.push_back(val);
-    }
+
+
     void push_back(const blob &blob) 
     { 
         const auto &data = blob.data();
