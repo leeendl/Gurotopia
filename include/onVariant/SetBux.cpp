@@ -2,6 +2,8 @@
 
 #include "SetBux.hpp"
 
+#include <algorithm> // linux
+
 void on::SetBux(ENetEvent& event)
 {
     ::peer *pPeer = static_cast<::peer*>(event.peer->data);

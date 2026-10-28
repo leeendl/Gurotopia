@@ -146,6 +146,10 @@ public:
 
     u_short fires_removed{};
     u_short gbc_pity{}; // @note GBC pity; for each 100 will receive super GBC
+
+    /* @todo move outside */
+    std::vector<::slot> trade_offers{};
+    bool trade_accepted = false;
 };
 
 extern ENetHost* host;

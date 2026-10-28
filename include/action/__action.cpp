@@ -18,6 +18,9 @@
 #include "info.hpp"
 #include "trash.hpp"
 #include "wrench.hpp"
+#include "trade_started.hpp"
+#include "mod_trade.hpp"
+#include "rem_trade.hpp"
 #include "itemfavourite.hpp"
 #include "inventoryfavuitrigger.hpp"
 #include "store.hpp"
@@ -48,6 +51,9 @@ std::unordered_map<std::string, std::function<void(ENetEvent&, const std::string
     {"action|info", std::bind(&action::info, std::placeholders::_1, std::placeholders::_2)},
     {"action|trash", std::bind(&action::trash, std::placeholders::_1, std::placeholders::_2)},
     {"action|wrench", std::bind(&action::wrench, std::placeholders::_1, std::placeholders::_2)},
+    {"action|trade_started", std::bind(&action::trade_started, std::placeholders::_1, std::placeholders::_2)},
+    {"action|mod_trade", std::bind(&action::mod_trade, std::placeholders::_1, std::placeholders::_2)},
+    {"action|rem_trade", std::bind(&action::rem_trade, std::placeholders::_1, std::placeholders::_2)},
     {"action|itemfavourite", std::bind(&action::itemfavourite, std::placeholders::_1, std::placeholders::_2)},
     {"action|inventoryfavuitrigger", std::bind(&action::inventoryfavuitrigger, std::placeholders::_1, std::placeholders::_2)},
     {"action|store", std::bind(&action::store, std::placeholders::_1, std::placeholders::_2)},

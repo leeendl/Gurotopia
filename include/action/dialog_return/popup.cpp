@@ -72,4 +72,12 @@ void popup(ENetEvent& event, const ::hPipe &hPipe)
     {
         send_varlist(event.peer, { "OnDialogRequestRML", "show_seed_diary_ui" });
     }
+    else if (hPipe["buttonClicked"] == "trade")
+    {
+        ::peer peer{.user_id = atoi(hPipe["netID"].c_str())};
+
+        peer.growid = peer.mysql_select<std::string>("growid", "", true);
+
+        send_varlist(event.peer, { "OnStartTrade", peer.growid, peer.user_id });
+    }
 }

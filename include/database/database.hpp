@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mysql/mysql.h>
+
 #include "tools/terminal.hpp"
 
 class mysql_gateway
@@ -43,6 +44,8 @@ public:
 
     MYSQL_STMT *pStmt;
 };
+
+#include <cstring> // linux
 
 struct blob
 {

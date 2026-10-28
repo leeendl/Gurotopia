@@ -6,9 +6,12 @@
 #include "onVariant/SetClothing.hpp"
 #include "onVariant/CountryState.hpp"
 #include "onVariant/ConsoleMessage.hpp"
+#include "onVariant/TradeStatus.hpp"
 #include "tools/time.hpp"
 
 #include "join_request.hpp"
+
+#include <algorithm> // linux
 
 void action::join_request(ENetEvent& event, const std::string& header, const std::string_view world_name = "") 
 {
@@ -16,6 +19,8 @@ void action::join_request(ENetEvent& event, const std::string& header, const std
     {
         ::peer *pPeer = static_cast<::peer*>(event.peer->data);
         ::hPipe hPipe{ header };
+
+        send_varlist(event.peer, { "OnForceTradeEnd" }); // @note sent before OnSendToServer
 
         std::string name =  hPipe["name"];
         if (name.empty() && !world_name.empty()) name = world_name;
