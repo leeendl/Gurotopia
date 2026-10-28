@@ -1,4 +1,7 @@
 #include "pch.hpp"
+
+#include "tools/terminal.hpp"
+
 #include <fstream>
 
 #include "database.hpp"
@@ -27,7 +30,7 @@ void mysql_gateway::create_table_if_not_exist()
         "objects BLOB"
     ")");
     
-    if (error) std::fprintf(stderr, "%s\n", mysql_error(mysql));
+    if (error) print(mysql_error(mysql));
 }
 
 bool mysql_gateway::column_found(const std::string &table, const std::string &column)
@@ -60,9 +63,9 @@ void mysql_gateway::mysql_connect()
 {
     if (!mysql_real_connect(mysql, this->host.c_str(), this->user.c_str(), this->passwd.c_str(), NULL, 3306u, NULL, 0ul)) 
     {
-        std::fprintf(stderr, "[MariaDB] %s\n", mysql_error(mysql));
+        print(mysql_error(mysql));
     }
-    else printf("connected to MariaDB server on %s:%d\n", mysql->host, mysql->port);
+    else print(std::format("connected to MariaDB server on {}:{}", mysql->host, mysql->port).c_str());
 
     mysql_query(mysql, "CREATE DATABASE IF NOT EXISTS gurotopia");
     mysql_select_db(mysql, "gurotopia");
@@ -104,34 +107,38 @@ hStmt::hStmt(const std::string &query)
     this->pStmt = mysql_stmt_init(db.mysql);
     if (!pStmt) 
     {
-        std::fprintf(stderr, "%s\n", mysql_error(db.mysql));
+        log_stmt_error();
     }
     if (mysql_stmt_prepare(pStmt, query.c_str(), (u_long)query.size()))
     {
-        std::fprintf(stderr, "%s\n", mysql_error(db.mysql));
+        log_stmt_error();
     }
 }
 hStmt::~hStmt() 
 {
     if (mysql_stmt_close(pStmt))
     {
-        std::fprintf(stderr, "%s\n", mysql_error(db.mysql));
+        log_stmt_error();
     }
 }
 
 void hStmt::bind_param(MYSQL_BIND *param)
 {
-    if (mysql_stmt_bind_param(pStmt, param)) log_err();
+    if (mysql_stmt_bind_param(pStmt, param)) log_stmt_error();
 }
 void hStmt::execute()
 {
-    if (mysql_stmt_execute(pStmt)) log_err();
+    if (mysql_stmt_execute(pStmt)) log_stmt_error();
 }
 void hStmt::fetch()
 {
     int value = mysql_stmt_fetch(pStmt);
-    if (value == 1 || value == MYSQL_DATA_TRUNCATED) log_err();
+    if (value == 1 || value == MYSQL_DATA_TRUNCATED) log_stmt_error();
     else if (value == 0 || value == MYSQL_NO_DATA) /*@todo do something later...*/; // @note success
+}
+void hStmt::log_stmt_error() 
+{
+    print(mysql_stmt_error(pStmt));
 }
 /* ~ hStmt ~ */
 

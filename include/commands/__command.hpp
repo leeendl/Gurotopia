@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <functional>
 
 extern std::array<std::string_view, 6> cmd_requires_arg;
 

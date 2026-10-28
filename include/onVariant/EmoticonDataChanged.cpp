@@ -1,4 +1,5 @@
 #include "pch.hpp"
+
 #include <unordered_map>
 
 #include "EmoticonDataChanged.hpp"

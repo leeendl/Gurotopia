@@ -1,18 +1,22 @@
 #include "pch.hpp"
+
 #include "onVariant/NameChanged.hpp"
 #include "onVariant/SetClothing.hpp"
 #include "onVariant/Action.hpp"
 #include "onVariant/ConsoleMessage.hpp"
 #include "commands/weather.hpp"
-#include "item_activate.hpp"
 #include "tools/random.hpp"
 #include "tools/time.hpp"
 #include "tools/create_dialog.hpp"
 #include "action/quit_to_exit.hpp"
 #include "action/join_request.hpp"
+
 #include "item_activate_object.hpp"
+#include "item_activate.hpp"
 
 #include "tile_change.hpp"
+
+#include <algorithm>
 
 void tile_change(ENetEvent& event, ::gamePacket gamePacket) 
 {

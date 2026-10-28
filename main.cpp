@@ -1,15 +1,19 @@
 /*
     @copyright gurotopia (c) 2024-05-25
-    @version parent SHA: 0a9d5b0cebabd9b7b43ffceb427f776e0a5fb5ce 2026-10-27
+    @version parent SHA: fbd6dfca75f88beb84f09462e834a3b9f5ad38ea 2026-10-28
 */
 #include "include/pch.hpp"
 #include "include/eventType/_eventType.hpp"
 
-#include "include/database/shouhin.hpp" // @note init_shouhin_tachi()
+#include "include/database/shouhin.hpp" // @note parse_store()
 #include "include/https/https.hpp" // @note https::listener()
 #include "include/https/server_data.hpp" // @note gServer_data
-#include "include/automate/holiday.hpp" // @note holiday
+#include "include/database/database.hpp"
+#include "include/automate/holiday.hpp"
+#include "include/tools/terminal.hpp"
+
 #include <csignal>
+#include <thread>
 
 namespace
 {
@@ -59,6 +63,6 @@ int main()
     enet_deinitialize();
     mysql_library_end();
 
-    puts("killed gurotopia! [EXIT_SUCCESS]");
+    print("killed gurotopia! [EXIT_SUCCESS]");
     return EXIT_SUCCESS;
 }

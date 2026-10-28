@@ -1,5 +1,5 @@
 #include "pch.hpp"
-#include <ctime>
+
 #include "SetBux.hpp"
 
 void on::SetBux(ENetEvent& event)

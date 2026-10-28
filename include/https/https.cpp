@@ -1,10 +1,9 @@
 #include "pch.hpp"
-#include "server_data.hpp"
 
-#include <openssl/err.h>
+#include "tools/terminal.hpp"
+#include <openssl/ssl.h>
 
 #ifdef _WIN32
-    #include <winsock2.h>
     #include <ws2tcpip.h>
 #else
     #include <csignal>
@@ -19,6 +18,8 @@
     #define SOCKET_ERROR	(-1)
 #endif
 
+#include "server_data.hpp"
+
 #include "https.hpp"
 
 /* cross-platform socket close */
@@ -32,16 +33,16 @@ static void cross_close(SOCKET fd)
 #endif
     ; // ending of ret. hehe some silly code ;)
 
-    if (ret == SOCKET_ERROR) printf("socket close error.\n");
+    if (ret == SOCKET_ERROR) print("socket close error.");
 }
 
 /* cross-platform WSA error log, fallback on linux with strerror() */
 static void cross_log(const std::string &message)
 {
 #ifdef _WIN32
-    std::fprintf(stderr, "%s: %d\n", message.c_str(), WSAGetLastError());
+    print(std::format("{}: {}", message, WSAGetLastError()));
 #else // @note unix
-    std::fprintf(stderr, "%s: %s\n", message.c_str(), strerror(errno));
+    print(std::format("{}: {}", message, strerror(errno)));
 #endif
 }
 
@@ -55,34 +56,34 @@ void https::listener()
     SSL_CTX *ctx = SSL_CTX_new(TLS_server_method());
     if (!ctx)
     {
-        ERR_print_errors_fp(stderr);
+        print("The creation of a new SSL_CTX object failed.");
     }
     /* https://docs.openssl.org/master/man3/SSL_CTX_use_certificate/#return-values */
     if (SSL_CTX_use_certificate_file(ctx, "resources/ctx/server.crt", SSL_FILETYPE_PEM) != 1 ||
         SSL_CTX_use_PrivateKey_file(ctx, "resources/ctx/server.key", SSL_FILETYPE_PEM)  != 1)
     {
-        ERR_print_errors_fp(stderr);
+        print("certificate could not be loaded.");
     }
     else {
         /* https://docs.openssl.org/master/man3/SSL_CTX_use_certificate/#return-values */
         X509 *cert = SSL_CTX_get0_certificate(ctx);
         if (!cert)
         {
-            ERR_print_errors_fp(stderr);
+            print("SSL_CTX_get0_certificate() failed.");
         }
         /* https://docs.openssl.org/3.2/man3/X509_get0_notBefore/#return-values */
         const ASN1_TIME *notAfter = X509_get0_notAfter(cert);
         if (notAfter == nullptr)
         {
-            ERR_print_errors_fp(stderr);
+            print("X509_get0_notAfter() failed.");
         }
         int day, sec;
         /* https://docs.openssl.org/1.0.2/man3/ASN1_TIME_set/#return-values */
         if (ASN1_TIME_diff(&day, &sec, nullptr, notAfter) == 0)
         {
-            ERR_print_errors_fp(stderr);
+            print("ASN1_TIME_diff() failed.");
         }
-        printf("certificate expires in %d days\n", day);
+        print(std::format("certificate expires in {} days", day));
     }
     
 #ifdef SIGPIPE // @note unix
@@ -140,7 +141,7 @@ void https::listener()
     {
         cross_log("failed to listen on socket");
     }
-    else std::printf("listening on %s:%hu\n", gServer_data.server.c_str(), gServer_data.port);
+    else print(std::format("listening on {}:{}", gServer_data.server, gServer_data.port));
     
     while (true)
     {
@@ -155,18 +156,18 @@ void https::listener()
         /* https://docs.openssl.org/3.0/man3/SSL_accept/#return-values */
         else if (SSL_set_fd(ssl, fd) != 1 || SSL_accept(ssl) <= 0) {
             //int ret = SSL_get_error(ssl, 3);
-            ERR_print_errors_fp(stderr);
+            print("SSL handshake failed.");
         }
         else {
-            char buf[245+36]; // @note size of growtopia's POST request.
+            char buf[245+38]; // @note size of growtopia's POST request.
 
             int rbytes = SSL_read(ssl, buf, sizeof(buf));
-            if (rbytes <= 0) ERR_print_errors_fp(stderr); // @todo support retryable
+            if (rbytes <= 0) print("SSL_read() failed."); // @todo support retryable
             else {
-                printf("%s\n", buf); // @note to confirm the peer connected. else you could also see if loginurl dashboard appears.
+                print(std::string(buf, rbytes)); // @note to confirm the peer connected. else you could also see if loginurl dashboard appears.
 
                 int wbytes = SSL_write(ssl, response.c_str(), response.length());
-                if (wbytes < response.length()) ERR_print_errors_fp(stderr); // @todo support retryable
+                if (wbytes < response.length()) print("SSL_write() failed."); // @todo support retryable
             }
         }
 
@@ -174,7 +175,7 @@ void https::listener()
         if (SSL_shutdown(ssl) <0) 
         {
             //int ret = SSL_get_error(ssl, 3);
-            ERR_print_errors_fp(stderr);
+            print("SSL_shutdown() failed.");
         }
         SSL_free(ssl);
         if (::shutdown(fd, 2) == SOCKET_ERROR) cross_log("failed to shutdown socket"); // @todo unsure if WSA can handle this.

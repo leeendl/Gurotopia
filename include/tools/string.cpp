@@ -1,7 +1,9 @@
 #include "pch.hpp"
-#include <ranges>
 
 #include "string.hpp"
+
+#include <algorithm>
+#include <ranges>
 
 std::vector<std::string> readch(const std::string &str, char deli) 
 {

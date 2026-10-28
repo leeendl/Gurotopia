@@ -1,5 +1,7 @@
 #include "pch.hpp"
+
 #include "tools/create_dialog.hpp"
+
 #include "trash.hpp"
 
 void action::trash(ENetEvent& event, const std::string& header)

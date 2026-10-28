@@ -1,4 +1,5 @@
 #include "pch.hpp"
+
 #include "create_dialog.hpp"
 
 create_dialog& create_dialog::set_default_color(std::string code)

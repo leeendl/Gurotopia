@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mysql/mysql.h>
+#include "tools/terminal.hpp"
 
 class mysql_gateway
 {
@@ -38,7 +39,7 @@ public:
     void fetch();
 
     /* https://dev.mysql.com/doc/mysql-errors/8.4/en/client-error-reference.html */
-    void log_err() { std::fprintf(stderr, "[MariaDB] %s\n", mysql_error(db.mysql)); }
+    void log_stmt_error();
 
     MYSQL_STMT *pStmt;
 };

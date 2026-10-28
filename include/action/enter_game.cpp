@@ -1,9 +1,9 @@
 #include "pch.hpp"
+
 #include "onVariant/RequestWorldSelectMenu.hpp"
 #include "onVariant/RequestGazette.hpp"
 #include "onVariant/ConsoleMessage.hpp"
 #include "onVariant/SetBux.hpp"
-#include "tools/create_dialog.hpp"
 #include "automate/holiday.hpp"
 
 #include "enter_game.hpp"
@@ -19,6 +19,12 @@ void action::enter_game(ENetEvent& event, const std::string& header)
         )
     );
     on::ConsoleMessage(event.peer, holiday_greeting().second);
+    if (active_holiday == holiday::HALLOWEEN)
+    {
+        on::ConsoleMessage(event.peer, "Growtopians have collectively released `20`` `9Corrupted Souls`` from the Tomb of Growganoth! Growganoth is pleased and unleashes the corrupted `2Tarantula Legs`` upon Growtopia!");
+        send_varlist(event.peer, { "OnEventButtonDataSet", "HalloweenButton", 1, /*@todo*/ });
+    }
+    on::ConsoleMessage(event.peer, "`3Today is (null)!`` Your first (null) quest will give 1 `2Growtoken`` and all (null) quests will give 25% bonus points!");
     on::ConsoleMessage(event.peer, "`5Personal Settings active:`` `#Punch Joystick enabled``");
     
     send_inventory_state(event);

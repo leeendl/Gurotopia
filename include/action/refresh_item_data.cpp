@@ -1,5 +1,7 @@
 #include "pch.hpp"
+
 #include "onVariant/ConsoleMessage.hpp"
+
 #include "refresh_item_data.hpp"
 
 void action::refresh_item_data(ENetEvent& event, const std::string& header) 

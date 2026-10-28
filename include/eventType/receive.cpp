@@ -1,7 +1,11 @@
 #include "pch.hpp"
+
 #include "action/__action.hpp"
 #include "gamePacket/_gamePacket.hpp"
+
 #include "receive.hpp"
+
+#include <algorithm>
 
 void receive(ENetEvent& event) 
 {
@@ -11,7 +15,7 @@ void receive(ENetEvent& event)
         case 2: case 3: 
         {
             std::string header{data.begin() + 4, data.end() - 1};
-            puts(header.c_str());
+            print(header);
             
             std::ranges::replace(header, '\n', '|');
             const std::vector<std::string> pipes = readch(header, '|');
@@ -39,7 +43,7 @@ void receive(ENetEvent& event)
                 i->second(event, std::move(gamePacket));
             break;
         }
-        default: printf("received unqiue: %d\n", data[0ull]);
+        default: print(std::format("received unqiue: {}", data[0ull]));
     }
     enet_packet_destroy(event.packet);
 }

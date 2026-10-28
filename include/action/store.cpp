@@ -1,7 +1,6 @@
 #include "pch.hpp"
-#include "store.hpp"
 
-std::string payment_site{ "https://discord.gg/zzWHgzaF7J" }; // @note replace with your payment site (paypal, ect)
+#include "store.hpp"
 
 void action::store(ENetEvent& event, const std::string& header)
 {
@@ -9,6 +8,8 @@ void action::store(ENetEvent& event, const std::string& header)
 
     if (header.empty() || pipes[3] == "gem") // @note location|gem
     {
+        std::string payment_site{ "https://discord.gg/zzWHgzaF7J" }; // @note replace with your payment site (paypal, ect)
+
         send_varlist(event.peer, {
             "OnStoreRequest",
             std::format(

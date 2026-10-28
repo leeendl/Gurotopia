@@ -38,6 +38,7 @@ enum lock_state : u_char
 
 char get_type(const ::item &item);
 
+#include "database.hpp"
 
 struct block 
 {

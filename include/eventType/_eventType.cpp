@@ -1,7 +1,9 @@
 #include "pch.hpp"
+
 #include "connect.hpp"
 #include "disconnect.hpp"
 #include "receive.hpp"
+
 #include "_eventType.hpp"
 
 std::unordered_map<ENetEventType, std::function<void(ENetEvent&)>> eventType_pool

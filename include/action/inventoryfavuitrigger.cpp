@@ -1,5 +1,7 @@
 #include "pch.hpp"
+
 #include "tools/create_dialog.hpp"
+
 #include "inventoryfavuitrigger.hpp"
 
 void action::inventoryfavuitrigger(ENetEvent& event, const std::string& header)

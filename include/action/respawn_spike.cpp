@@ -1,4 +1,5 @@
 #include "pch.hpp"
+
 #include "respawn_spike.hpp"
 
 void action::respawn_spike(ENetEvent& event, const std::string& header) 

@@ -1,5 +1,7 @@
 #include "pch.hpp"
+
 #include "tools/create_dialog.hpp"
+
 #include "friends.hpp"
 
 void action::friends(ENetEvent& event, const std::string& header) 

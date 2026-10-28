@@ -1,10 +1,13 @@
 #include "pch.hpp"
+
 #include "commands/__command.hpp"
 #include "onVariant/ConsoleMessage.hpp"
 #include "tools/time.hpp"
 #include "tools/random.hpp"
 
 #include "input.hpp"
+
+#include <algorithm>
 
 void action::input(ENetEvent& event, const std::string& header)
 {

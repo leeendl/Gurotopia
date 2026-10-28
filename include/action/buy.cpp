@@ -1,9 +1,10 @@
 #include "pch.hpp"
+
 #include "store.hpp"
 #include "onVariant/SetBux.hpp"
 #include "database/shouhin.hpp"
-#include "buy.hpp"
 
+#include "buy.hpp"
 
 void action::buy(ENetEvent& event, const std::string& header, const std::string_view selection = "")
 {

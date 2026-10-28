@@ -5,6 +5,8 @@
 
 #include "world.hpp"
 
+#include <algorithm>
+
 char get_type(const ::item &item)
 {
     switch (item.type)

@@ -1,6 +1,8 @@
 #include "pch.hpp"
+
 #include "action/join_request.hpp"
 #include "action/quit_to_exit.hpp"
+
 #include "tile_activate.hpp"
 
 void tile_activate(ENetEvent& event, ::gamePacket gamePacket)

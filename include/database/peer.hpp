@@ -2,7 +2,6 @@
 
 #include <cmath> // @note std::floor
 #include <deque> // @note std::deque
-#include <functional>
 
 enum bgra : u_int
 {
@@ -11,6 +10,8 @@ enum bgra : u_int
     RED   = 0x0000ff00,
     ALPHA = 0x000000ff
 };
+
+#include "database.hpp"
 
 /* id, count */
 struct slot {

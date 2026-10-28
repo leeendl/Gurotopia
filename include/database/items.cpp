@@ -1,4 +1,7 @@
 #include "pch.hpp"
+
+#include "tools/terminal.hpp"
+
 #include <filesystem>
 #include <fstream>
 
@@ -21,7 +24,7 @@ void shift_pos(const std::vector<u_char> &data, u_int &pos, T &value) noexcept /
 {
     u_char *i8 = reinterpret_cast<u_char*>(&value);
 
-    if (pos + sizeof(T) >= data.size()) puts("this items.dat is unsupported");
+    if (pos + sizeof(T) >= data.size()) print("this items.dat is unsupported");
     for (std::size_t i = 0ull; i < sizeof(T); ++i) 
     {
         i8[i] = data[pos + i];
@@ -215,5 +218,5 @@ void decode_items_dat()
         
         items.emplace_back(item);
     }
-    printf("items.dat parsed successfully!\n");
+    print("items.dat parsed successfully!");
 }

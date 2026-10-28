@@ -1,4 +1,5 @@
 #include "pch.hpp"
+
 #include "buy.hpp"
 
 #include "storenavigate.hpp"
@@ -15,6 +16,6 @@ void action::storenavigate(ENetEvent& event, const std::string& header)
         if      (pipes[i] == "item") item = pipes[i+1];
         else if (pipes[i] == "selection") selection = pipes[i+1];
     }
-    buy(event, header, selection);
-
+    
+    action::buy(event, header, selection);
 }

@@ -1,5 +1,7 @@
 #include "pch.hpp"
+
 #include "tools/create_dialog.hpp"
+
 #include "info.hpp"
 
 std::vector<std::string> properties(u_char property) 

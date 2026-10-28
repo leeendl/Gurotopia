@@ -1,11 +1,11 @@
 #include "pch.hpp"
+
 #include "onVariant/EmoticonDataChanged.hpp"
 #include "onVariant/Spawn.hpp"
 #include "onVariant/BillboardChange.hpp"
 #include "onVariant/SetClothing.hpp"
 #include "onVariant/CountryState.hpp"
 #include "onVariant/ConsoleMessage.hpp"
-#include "commands/weather.hpp"
 #include "tools/time.hpp"
 
 #include "join_request.hpp"

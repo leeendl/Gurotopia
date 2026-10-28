@@ -1,5 +1,7 @@
 #include "pch.hpp"
+
 #include "action/quit_to_exit.hpp"
+
 #include "quit.hpp"
 
 void action::quit(ENetEvent& event, const std::string& header) 

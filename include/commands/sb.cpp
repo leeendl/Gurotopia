@@ -1,4 +1,5 @@
 #include "pch.hpp"
+
 #include "onVariant/ConsoleMessage.hpp"
 
 #include "sb.hpp"
