@@ -9,8 +9,9 @@
 
 </div>
 
+
 ---
-# <img width="250" height="53" alt="image" src="https://github.com/user-attachments/assets/0a3bee67-ad6c-4e4c-bd0e-aed89d9b5c09" />
+### <img width="250" height="53" alt="image" src="https://github.com/user-attachments/assets/0a3bee67-ad6c-4e4c-bd0e-aed89d9b5c09" />
 
 ### ![](https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/archive.svg) 1. Requirements
    - [**MSYS2**](https://www.msys2.org/)
@@ -19,7 +20,7 @@
 
 ### 2. Setup MSYS2
    - Locate your MSYS2 folder at `C:\msys64`, open `ucrt64.exe`, and run the following command:
-   
+     
      ```bash
      pacman -S --needed mingw-w64-ucrt-x86_64-{gcc,openssl} make
      ```
@@ -31,12 +32,14 @@
 ### ![](https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/debug-alt-small.svg) 4. Run
    - After compiling, press **`F5`** to run the server!
 
-# <img src="https://github.com/user-attachments/assets/fecde323-04c5-4b82-a08d-badcb184be6a" width="30" /> Linux
+
+---
+### <img align="center" width="48" src="https://github.com/user-attachments/assets/b007ac1f-26fe-4fcf-aa3d-57250b4a0f82" /> Linux
 
 ### ![](https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/archive.svg) 1. Install Dependencies
 
 - Enter command associated with your distribution into the terminal to install nessesary tools.
-   <details><summary><img width="22" height="22" src="https://github.com/user-attachments/assets/8359ba6e-a9b2-4500-893f-61eaf40e2478" /> Arch</summary>
+   <details><summary><img width="22" src="https://github.com/user-attachments/assets/8359ba6e-a9b2-4500-893f-61eaf40e2478" /> Arch</summary>
    <p>
       
    ```bash
@@ -44,7 +47,7 @@
    ```
    </p>
    </details> 
-   <details><summary><img width="22" height="22" src="https://github.com/user-attachments/assets/742f35c4-3e69-450e-8095-9fabe9ecd0d8" /> Debian <img width="18" height="18" src="https://github.com/user-attachments/assets/46f0770e-f4ed-480b-851d-c90b05fae52f" /> Ubuntu</summary>
+   <details><summary><img width="22" src="https://github.com/user-attachments/assets/742f35c4-3e69-450e-8095-9fabe9ecd0d8" /> Debian <img width="18" src="https://github.com/user-attachments/assets/46f0770e-f4ed-480b-851d-c90b05fae52f" /> Ubuntu</summary>
    <p>
       
    ```bash
@@ -65,16 +68,18 @@
      ```bash
      ./main.out
      ```
-# macOS
 
-> [!NOTE]
-> macOS builds are only tested on Intel (`x86_64`). Apple Silicon is not tested yet.
-> `include/enet/lib/libenet_macos.a` is a universal (`x86_64` + `arm64`) archive, so it should still link on Apple Silicon.
+
+---
+### <img align="center" width="48" src="https://github.com/user-attachments/assets/58ce37a9-2e9d-4503-8dd9-9ecf8ce04dcd" /> macOS
+
+> [!WARNING]
+> Apple Silicon is not tested yet.
 
 ### ![](https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/archive.svg) 1. Install Dependencies
 
 - Install [Homebrew](https://brew.sh/) or [MacPorts](https://www.macports.org/install.php), then run the matching command. Mixing is fine: MacPorts GCC with Homebrew OpenSSL and MariaDB uses the Homebrew compile command.
-   <details><summary>Homebrew</summary>
+   <details><summary><img align="center" width="24" src="https://github.com/user-attachments/assets/7bb35b38-a46e-4b60-8dcc-9e13c1058480" /> Homebrew</summary>
    <p>
       
    ```bash
@@ -94,7 +99,7 @@
 ### ![](https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/build.svg) 2. Compile
 
 - Apple's SDK does not include OpenSSL headers. Pass Homebrew or MacPorts paths on the `make` line. A plain `make` fails with `openssl/ssl.h: No such file or directory`. Use `-lenet_macos`; the default `-lenet` is a Linux library.
-   <details><summary>Homebrew</summary>
+   <details><summary><img align="center" width="24" src="https://github.com/user-attachments/assets/7bb35b38-a46e-4b60-8dcc-9e13c1058480" /> Homebrew</summary>
    <p>
       
    ```bash
