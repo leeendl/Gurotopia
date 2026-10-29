@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - run: |
-          brew install gcc make openssl@3 mariadb-connector-c
+          brew install gcc make mariadb-connector-c
 
       - run: |
           make -j"$(sysctl -n hw.ncpu)" \
