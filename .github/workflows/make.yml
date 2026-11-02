@@ -2,8 +2,10 @@ name: gcc/make CI
 on: 
   push:
   pull_request:
-  permissions:
-    contents: read
+
+permissions:
+  contents: read
+  
 jobs:
   linux:
     permissions:
