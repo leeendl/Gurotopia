@@ -1,7 +1,21 @@
-name: gcc/make CI
+name: make with G++
 on: 
   push:
+    push:
+      - '**.c'
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '**make.yml'
+      - '**Makefile'
   pull_request:
+    push:
+      - '**.c'
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '**make.yml'
+      - '**Makefile'
 
 permissions:
   contents: read
