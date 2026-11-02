@@ -5,9 +5,9 @@
 #include "include/pch.hpp"
 #include "include/eventType/_eventType.hpp"
 
-#include "include/database/shouhin.hpp" // @note parse_store()
-#include "include/https/https.hpp" // @note https::listener()
-#include "include/https/server_data.hpp" // @note gServer_data
+#include "include/database/shouhin.hpp" // @include parse_store()
+#include "include/https/https.hpp" // @include https::listener()
+#include "include/https/server_data.hpp" // @include gServer_data
 #include "include/database/database.hpp"
 #include "include/automate/holiday.hpp"
 #include "include/tools/terminal.hpp"
@@ -54,8 +54,7 @@ int main()
     ENetEvent event{};
     while (!gSignal)
         while (enet_host_service(host, &event, 1000/*ms*/) > 0)
-            if (const auto i = eventType_pool.find(event.type); i != eventType_pool.end())
-                i->second(event);
+            eventType_pool[event.type](event);
 
     safe_disconnect_peers(gSignal);
     enet_host_destroy(host);
