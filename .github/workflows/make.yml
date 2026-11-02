@@ -5,15 +5,14 @@ on:
 
 permissions:
   contents: read
-  
+
 jobs:
   linux:
     permissions:
       contents: write
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -25,6 +24,7 @@ jobs:
   windows:
     permissions:
       contents: write
+    runs-on: windows-latest
     strategy:
       fail-fast: false
     steps:
@@ -44,9 +44,9 @@ jobs:
   macos:
     permissions:
       contents: write
+    runs-on: macos-latest
     strategy:
       fail-fast: false
-    runs-on: macos-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
